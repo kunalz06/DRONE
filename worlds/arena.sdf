@@ -1,0 +1,344 @@
+<?xml version="1.0" ?>
+<sdf version="1.10">
+  <world name="arena_world">
+    <physics name="1ms" type="ignored">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+    </physics>
+
+    <plugin filename="gz-sim-physics-system" name="gz::sim::systems::Physics"/>
+    <plugin filename="gz-sim-user-commands-system" name="gz::sim::systems::UserCommands"/>
+    <plugin filename="gz-sim-scene-broadcaster-system" name="gz::sim::systems::SceneBroadcaster"/>
+    <plugin filename="gz-sim-sensors-system" name="gz::sim::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+
+    <scene>
+      <ambient>0.65 0.58 0.50 1</ambient>
+      <background>0.78 0.71 0.62 1</background>
+      <grid>false</grid>
+    </scene>
+
+    <light type="directional" name="sun">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 20 0 0 0</pose>
+      <diffuse>0.95 0.88 0.78 1</diffuse>
+      <specular>0.2 0.2 0.2 1</specular>
+      <direction>-0.45 0.15 -0.88</direction>
+    </light>
+
+    <!-- Full floor -->
+    <model name="arena_floor">
+      <static>true</static>
+      <pose>0 0 -0.05 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>32 32 0.1</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>32 32 0.1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.48 0.30 0.18 1</ambient>
+            <diffuse>0.48 0.30 0.18 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- 16m x 16m mission zone tint -->
+    <model name="arena_zone">
+      <static>true</static>
+      <pose>0 0 0.001 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>16 16 0.002</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.56 0.36 0.22 1</ambient>
+            <diffuse>0.56 0.36 0.22 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Yellow boundary markers -->
+    <model name="yellow_bounds">
+      <static>true</static>
+      <pose>0 0 0.015 0 0 0</pose>
+      <link name="link">
+        <visual name="north">
+          <pose>8 0 0 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.12 16 0.03</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 0.95 0.0 1</ambient>
+            <diffuse>1 0.95 0.0 1</diffuse>
+          </material>
+        </visual>
+        <visual name="south">
+          <pose>-8 0 0 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.12 16 0.03</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 0.95 0.0 1</ambient>
+            <diffuse>1 0.95 0.0 1</diffuse>
+          </material>
+        </visual>
+        <visual name="east">
+          <pose>0 8 0 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>16 0.12 0.03</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 0.95 0.0 1</ambient>
+            <diffuse>1 0.95 0.0 1</diffuse>
+          </material>
+        </visual>
+        <visual name="west">
+          <pose>0 -8 0 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>16 0.12 0.03</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 0.95 0.0 1</ambient>
+            <diffuse>1 0.95 0.0 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Optional low perimeter walls for clearer bounds -->
+    <model name="arena_walls">
+      <static>true</static>
+      <pose>0 0 0.5 0 0 0</pose>
+      <link name="link">
+        <collision name="north_collision">
+          <pose>8.1 0 0 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.05 16.2 1.0</size>
+            </box>
+          </geometry>
+        </collision>
+        <collision name="south_collision">
+          <pose>-8.1 0 0 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.05 16.2 1.0</size>
+            </box>
+          </geometry>
+        </collision>
+        <collision name="east_collision">
+          <pose>0 8.1 0 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>16.2 0.05 1.0</size>
+            </box>
+          </geometry>
+        </collision>
+        <collision name="west_collision">
+          <pose>0 -8.1 0 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>16.2 0.05 1.0</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="north_visual">
+          <pose>8.1 0 0 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.05 16.2 1.0</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.7 0.7 0.2 0.25</ambient>
+            <diffuse>0.7 0.7 0.2 0.25</diffuse>
+          </material>
+        </visual>
+        <visual name="south_visual">
+          <pose>-8.1 0 0 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.05 16.2 1.0</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.7 0.7 0.2 0.25</ambient>
+            <diffuse>0.7 0.7 0.2 0.25</diffuse>
+          </material>
+        </visual>
+        <visual name="east_visual">
+          <pose>0 8.1 0 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>16.2 0.05 1.0</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.7 0.7 0.2 0.25</ambient>
+            <diffuse>0.7 0.7 0.2 0.25</diffuse>
+          </material>
+        </visual>
+        <visual name="west_visual">
+          <pose>0 -8.1 0 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>16.2 0.05 1.0</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.7 0.7 0.2 0.25</ambient>
+            <diffuse>0.7 0.7 0.2 0.25</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Base / dock at center -->
+    <model name="base_station">
+      <static>true</static>
+      <pose>0 0 0.06 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>1.8 1.8 0.12</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="base_visual">
+          <geometry>
+            <box>
+              <size>1.8 1.8 0.12</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.10 0.20 0.80 1</ambient>
+            <diffuse>0.10 0.20 0.80 1</diffuse>
+          </material>
+        </visual>
+        <visual name="landing_target_ring">
+          <pose>0 0 0.065 0 0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.42</radius>
+              <length>0.002</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>1.0 1.0 1.0 1</ambient>
+            <diffuse>1.0 1.0 1.0 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Arena obstacles -->
+    <model name="obstacle_rock_1">
+      <static>true</static>
+      <pose>2.8 2.4 0.35 0 0 0.4</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <cylinder>
+              <radius>0.45</radius>
+              <length>0.7</length>
+            </cylinder>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>0.45</radius>
+              <length>0.7</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.45 0.27 0.16 1</ambient>
+            <diffuse>0.45 0.27 0.16 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="obstacle_rock_2">
+      <static>true</static>
+      <pose>-3.2 -2.1 0.30 0.1 0 1.0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>1.1 0.8 0.6</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1.1 0.8 0.6</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.40 0.24 0.14 1</ambient>
+            <diffuse>0.40 0.24 0.14 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="obstacle_pillar">
+      <static>true</static>
+      <pose>-1.0 3.6 0.55 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <cylinder>
+              <radius>0.25</radius>
+              <length>1.1</length>
+            </cylinder>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>0.25</radius>
+              <length>1.1</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.52 0.30 0.20 1</ambient>
+            <diffuse>0.52 0.30 0.20 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Mission drone spawn on base center -->
+    <include>
+      <uri>file:///home/kunal/Desktop/drone/models/px4_x500_lidar_rgb</uri>
+      <pose>0 0 0.35 0 0 0</pose>
+    </include>
+  </world>
+</sdf>
