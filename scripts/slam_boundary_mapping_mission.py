@@ -26,6 +26,11 @@ class SlamBoundaryMission(Node):
         self.base_xy = (0.0, 0.0)
         self.max_xy_speed = 1.1
         self.max_z_speed = 0.6
+        self.auto_max_yaw_rate = 0.9
+        self.auto_yaw_kp = 1.4
+        self.auto_yaw_align_tolerance_rad = math.radians(3.0)
+        self.auto_yaw_hover_before_move_s = 0.35
+        self.heading_activation_dist_m = 0.35
         self.arena_half_extent_m = 8.0
         self.lawnmower_edge_margin_m = 1.2
         self.lawnmower_lane_spacing_m = 1.8
@@ -81,6 +86,7 @@ class SlamBoundaryMission(Node):
         self.x = 0.0
         self.y = 0.0
         self.z = 0.0
+        self.yaw = 0.0
 
         self.front_yellow_ratio = 0.0
         self.down_yellow_ratio = 0.0
@@ -93,6 +99,7 @@ class SlamBoundaryMission(Node):
 
         self.boundary_avoid_until = -1.0
         self.last_boundary_log_s = -1.0
+        self.heading_aligned_since = None
 
         self.phase = "WAIT_SENSORS"
         self.phase_start = self._now_s()
@@ -125,6 +132,7 @@ class SlamBoundaryMission(Node):
             self.get_logger().info("Failsafe logic is enabled but test trigger is disabled for mapping runs.")
         self.get_logger().info("Waiting for odom, lidar scan, camera streams, and motor command bridge...")
         self.get_logger().info("Manual override topics ready: /manual_mode (Bool), /manual_cmd_vel (Twist).")
+        self.get_logger().info("Autonomous heading control enabled: hover + yaw before directional movement.")
 
     def _now_s(self) -> float:
         return self.get_clock().now().nanoseconds * 1e-9
@@ -155,6 +163,10 @@ class SlamBoundaryMission(Node):
         self.x = msg.pose.pose.position.x
         self.y = msg.pose.pose.position.y
         self.z = msg.pose.pose.position.z
+        q = msg.pose.pose.orientation
+        siny_cosp = 2.0 * (q.w * q.z + q.x * q.y)
+        cosy_cosp = 1.0 - 2.0 * (q.y * q.y + q.z * q.z)
+        self.yaw = math.atan2(siny_cosp, cosy_cosp)
 
         tf_msg = TransformStamped()
         tf_msg.header.stamp = msg.header.stamp
@@ -201,6 +213,7 @@ class SlamBoundaryMission(Node):
             self.get_logger().warn(f"Control mode -> {mode_str}")
             self.reached_since = None
             self.active_waypoint_start_s = None
+            self.heading_aligned_since = None
         if not self.manual_mode_enabled:
             self.manual_vx = 0.0
             self.manual_vy = 0.0
@@ -265,6 +278,27 @@ class SlamBoundaryMission(Node):
     def _clamp(val: float, low: float, high: float) -> float:
         return max(low, min(high, val))
 
+    @staticmethod
+    def _angle_wrap(rad: float) -> float:
+        return math.atan2(math.sin(rad), math.cos(rad))
+
+    def _heading_alignment_gate(self, desired_yaw: float, now_s: float) -> Tuple[bool, float]:
+        yaw_err = self._angle_wrap(desired_yaw - self.yaw)
+        yaw_rate = self._clamp(
+            self.auto_yaw_kp * yaw_err,
+            -self.auto_max_yaw_rate,
+            self.auto_max_yaw_rate,
+        )
+        yaw_ok = abs(yaw_err) <= self.auto_yaw_align_tolerance_rad
+        if yaw_ok:
+            if self.heading_aligned_since is None:
+                self.heading_aligned_since = now_s
+            heading_ready = (now_s - self.heading_aligned_since) >= self.auto_yaw_hover_before_move_s
+        else:
+            self.heading_aligned_since = None
+            heading_ready = False
+        return heading_ready, yaw_rate
+
     def _publish_enable(self, enabled: bool):
         if not rclpy.ok():
             return
@@ -310,7 +344,9 @@ class SlamBoundaryMission(Node):
         max_z_speed: Optional[float] = None,
         xy_tol: float = 0.25,
         z_tol: float = 0.20,
+        align_heading: bool = True,
     ) -> bool:
+        now = self._now_s()
         ex = x_ref - self.x
         ey = y_ref - self.y
         ez = z_ref - self.z
@@ -318,11 +354,35 @@ class SlamBoundaryMission(Node):
         xy_speed_limit = self.max_xy_speed if max_xy_speed is None else max_xy_speed
         z_speed_limit = self.max_z_speed if max_z_speed is None else max_z_speed
 
-        vx = self._clamp(0.85 * ex, -xy_speed_limit, xy_speed_limit)
-        vy = self._clamp(0.85 * ey, -xy_speed_limit, xy_speed_limit)
+        heading_ready = True
+        yaw_rate = 0.0
+        use_heading_lock = align_heading and dist_xy > self.heading_activation_dist_m
+        if use_heading_lock:
+            target_yaw = math.atan2(ey, ex)
+            heading_ready, yaw_rate = self._heading_alignment_gate(target_yaw, now)
+        else:
+            self.heading_aligned_since = None
+
+        if use_heading_lock:
+            if heading_ready:
+                speed_cmd = self._clamp(0.85 * dist_xy, 0.0, xy_speed_limit)
+                nose_x = math.cos(self.yaw)
+                nose_y = math.sin(self.yaw)
+                dir_x = ex / max(dist_xy, 1e-6)
+                dir_y = ey / max(dist_xy, 1e-6)
+                forward_alignment = max(0.0, nose_x * dir_x + nose_y * dir_y)
+                speed_cmd *= forward_alignment
+                vx = speed_cmd * nose_x
+                vy = speed_cmd * nose_y
+            else:
+                vx = 0.0
+                vy = 0.0
+        else:
+            vx = self._clamp(0.85 * ex, -xy_speed_limit, xy_speed_limit)
+            vy = self._clamp(0.85 * ey, -xy_speed_limit, xy_speed_limit)
         vz = self._clamp(0.9 * ez, -z_speed_limit, z_speed_limit)
 
-        self._publish_twist(vx, vy, vz)
+        self._publish_twist(vx, vy, vz, yaw_rate)
 
         xy_ok = dist_xy < xy_tol
         z_ok = abs(ez) < z_tol
@@ -345,19 +405,34 @@ class SlamBoundaryMission(Node):
         return False, ""
 
     def _run_boundary_avoidance(self):
+        now = self._now_s()
         dx = self.base_xy[0] - self.x
         dy = self.base_xy[1] - self.y
         norm = math.hypot(dx, dy)
+        yaw_rate = 0.0
+        heading_ready = True
 
-        if norm < 1e-3:
+        if norm > self.heading_activation_dist_m:
+            target_yaw = math.atan2(dy, dx)
+            heading_ready, yaw_rate = self._heading_alignment_gate(target_yaw, now)
+        else:
+            self.heading_aligned_since = None
+
+        if (norm < 1e-3) or (not heading_ready):
             vx, vy = 0.0, 0.0
         else:
             inward_speed = 0.9
-            vx = inward_speed * (dx / norm)
-            vy = inward_speed * (dy / norm)
+            nose_x = math.cos(self.yaw)
+            nose_y = math.sin(self.yaw)
+            dir_x = dx / max(norm, 1e-6)
+            dir_y = dy / max(norm, 1e-6)
+            forward_alignment = max(0.0, nose_x * dir_x + nose_y * dir_y)
+            speed = inward_speed * forward_alignment
+            vx = speed * nose_x
+            vy = speed * nose_y
 
         vz = self._clamp(0.8 * (self.target_alt_m - self.z), -0.25, 0.25)
-        self._publish_twist(vx, vy, vz)
+        self._publish_twist(vx, vy, vz, yaw_rate)
 
     def _near_outer_boundary(self) -> bool:
         return abs(self.x) >= self.boundary_trigger_extent_m or abs(self.y) >= self.boundary_trigger_extent_m
@@ -414,6 +489,7 @@ class SlamBoundaryMission(Node):
         self.phase_start = self._now_s()
         self.reached_since = None
         self.active_waypoint_start_s = None
+        self.heading_aligned_since = None
         self.get_logger().info(f"Phase -> {phase}")
 
     def _control_tick(self):
@@ -484,6 +560,7 @@ class SlamBoundaryMission(Node):
                 self.waypoint_idx += 1
                 self.reached_since = None
                 self.active_waypoint_start_s = None
+                self.heading_aligned_since = None
                 return
 
             tx, ty, tz = self.waypoints[self.waypoint_idx]
@@ -495,6 +572,7 @@ class SlamBoundaryMission(Node):
                     self.waypoint_idx += 1
                     self.reached_since = None
                     self.active_waypoint_start_s = None
+                    self.heading_aligned_since = None
                     self.get_logger().info(
                         f"Lawnmower waypoint {self.waypoint_idx}/{len(self.waypoints)} complete"
                     )

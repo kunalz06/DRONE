@@ -30,10 +30,11 @@ This launch starts:
 1. Waits for odometry, LiDAR scan, and both camera streams.
 2. Enables velocity control.
 3. Takes off from base `(0,0)` to `4.0 m`.
-4. Follows a mapping waypoint sweep of the arena at `4.0 m`.
-5. Detects yellow boundary lines from both cameras (HSV filtering).
-6. If yellow boundaries are detected, performs inward boundary-avoidance motion.
-7. Returns to `(0,0)` at `4.0 m`, hovers for `2 s`, descends slowly to `2.0 m`, holds `2 s`, then lands slowly.
+4. For each movement segment, briefly hovers, yaws to face travel direction (front camera aligned), then translates.
+5. Follows a mapping waypoint sweep of the arena at `4.0 m`.
+6. Detects yellow boundary lines from both cameras (HSV filtering).
+7. If yellow boundaries are detected, performs inward boundary-avoidance motion.
+8. Returns to `(0,0)` at `4.0 m`, hovers for `2 s`, descends slowly to `2.0 m`, holds `2 s`, then lands slowly.
 
 ## 4) Key ROS Topics
 - `/scan` (LiDAR, used by SLAM)
