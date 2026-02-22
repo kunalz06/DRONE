@@ -10,6 +10,12 @@
   gz_type_name: "gz.msgs.LaserScan"
   direction: GZ_TO_ROS
 
+- ros_topic_name: "/terrain_scan"
+  gz_topic_name: "/lidar_terrain_scan"
+  ros_type_name: "sensor_msgs/msg/LaserScan"
+  gz_type_name: "gz.msgs.LaserScan"
+  direction: GZ_TO_ROS
+
 - ros_topic_name: "/odom"
   gz_topic_name: "/model/px4_x500_lidar_rgb/odometry"
   ros_type_name: "nav_msgs/msg/Odometry"
@@ -26,6 +32,12 @@
   gz_topic_name: "/down_rgb_camera/image_raw"
   ros_type_name: "sensor_msgs/msg/Image"
   gz_type_name: "gz.msgs.Image"
+  direction: GZ_TO_ROS
+
+- ros_topic_name: "/tof_scan"
+  gz_topic_name: "/tof_scan"
+  ros_type_name: "sensor_msgs/msg/LaserScan"
+  gz_type_name: "gz.msgs.LaserScan"
   direction: GZ_TO_ROS
 
 - ros_topic_name: "/cmd_vel"

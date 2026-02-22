@@ -25,6 +25,7 @@ Velocity control (setpoint increments):
 
 Other:
   space : stop all velocities (x,y,z,yaw = 0)
+  b     : return to base (auto hover, align to pad arrow, slow land)
   r     : print this help
   q     : quit (also returns to autonomous mode)
 """
@@ -35,6 +36,7 @@ class ManualControlLink(Node):
         super().__init__("manual_control_link")
         self.pub_mode = self.create_publisher(Bool, "/manual_mode", 10)
         self.pub_cmd = self.create_publisher(Twist, "/manual_cmd_vel", 10)
+        self.pub_rtb = self.create_publisher(Bool, "/manual_rtb", 10)
 
         self.manual_mode_enabled = False
         self.vx = 0.0
@@ -45,7 +47,7 @@ class ManualControlLink(Node):
         self.xy_step = 0.20
         self.z_step = 0.15
         self.yaw_step = 0.25
-        self.max_xy = 1.2
+        self.max_xy = 1.4
         self.max_z = 0.7
         self.max_yaw = 1.2
 
@@ -66,9 +68,23 @@ class ManualControlLink(Node):
         msg.angular.z = self.yaw_rate
         self.pub_cmd.publish(msg)
 
+    def _publish_rtb(self):
+        msg = Bool()
+        msg.data = True
+        self.pub_rtb.publish(msg)
+
     def publish(self):
         self._publish_mode()
         self._publish_cmd()
+
+    def try_publish(self) -> bool:
+        if not rclpy.ok():
+            return False
+        try:
+            self.publish()
+            return True
+        except Exception:
+            return False
 
     def _apply_limits(self):
         self.vx = self._clamp(self.vx, -self.max_xy, self.max_xy)
@@ -109,12 +125,17 @@ class ManualControlLink(Node):
         elif key == " ":
             self.stop()
             print("[CMD] zero velocity")
+        elif key == "b":
+            self.manual_mode_enabled = False
+            self.stop()
+            self._publish_rtb()
+            print("[CMD] RTB requested")
         elif key == "r":
             print(HELP_TEXT)
         elif key == "q":
             self.manual_mode_enabled = False
             self.stop()
-            self.publish()
+            self.try_publish()
             print("[EXIT] manual link stopped")
             return False
         else:
@@ -154,18 +175,30 @@ def main():
             key = _read_key(0.05)
             if key:
                 keep_running = node.process_key(key)
-            node.publish()
+            if not node.try_publish():
+                keep_running = False
     except KeyboardInterrupt:
         pass
     finally:
         node.manual_mode_enabled = False
         node.stop()
-        for _ in range(5):
-            node.publish()
-            rclpy.spin_once(node, timeout_sec=0.0)
-        node.destroy_node()
         if rclpy.ok():
-            rclpy.shutdown()
+            for _ in range(5):
+                if not node.try_publish():
+                    break
+                try:
+                    rclpy.spin_once(node, timeout_sec=0.0)
+                except Exception:
+                    break
+        try:
+            node.destroy_node()
+        except Exception:
+            pass
+        if rclpy.ok():
+            try:
+                rclpy.shutdown()
+            except Exception:
+                pass
         termios.tcsetattr(sys.stdin.fileno(), termios.TCSADRAIN, old_settings)
 
 

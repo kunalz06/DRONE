@@ -19,6 +19,16 @@
       <grid>false</grid>
     </scene>
 
+    <!-- Start with camera framed on base + drone spawn area -->
+    <gui fullscreen="0">
+      <camera name="spawn_view">
+        <!-- Keep default view inside the arena to avoid rendering through transparent walls. -->
+        <pose>-6.0 -6.0 6.2 0 0.47 0.78</pose>
+        <view_controller>orbit</view_controller>
+        <projection_type>perspective</projection_type>
+      </camera>
+    </gui>
+
     <light type="directional" name="sun">
       <cast_shadows>true</cast_shadows>
       <pose>0 0 20 0 0 0</pose>
@@ -173,8 +183,8 @@
             </box>
           </geometry>
           <material>
-            <ambient>0.7 0.7 0.2 0.25</ambient>
-            <diffuse>0.7 0.7 0.2 0.25</diffuse>
+            <ambient>0.68 0.68 0.22 1</ambient>
+            <diffuse>0.68 0.68 0.22 1</diffuse>
           </material>
         </visual>
         <visual name="south_visual">
@@ -185,8 +195,8 @@
             </box>
           </geometry>
           <material>
-            <ambient>0.7 0.7 0.2 0.25</ambient>
-            <diffuse>0.7 0.7 0.2 0.25</diffuse>
+            <ambient>0.68 0.68 0.22 1</ambient>
+            <diffuse>0.68 0.68 0.22 1</diffuse>
           </material>
         </visual>
         <visual name="east_visual">
@@ -197,8 +207,8 @@
             </box>
           </geometry>
           <material>
-            <ambient>0.7 0.7 0.2 0.25</ambient>
-            <diffuse>0.7 0.7 0.2 0.25</diffuse>
+            <ambient>0.68 0.68 0.22 1</ambient>
+            <diffuse>0.68 0.68 0.22 1</diffuse>
           </material>
         </visual>
         <visual name="west_visual">
@@ -209,8 +219,8 @@
             </box>
           </geometry>
           <material>
-            <ambient>0.7 0.7 0.2 0.25</ambient>
-            <diffuse>0.7 0.7 0.2 0.25</diffuse>
+            <ambient>0.68 0.68 0.22 1</ambient>
+            <diffuse>0.68 0.68 0.22 1</diffuse>
           </material>
         </visual>
       </link>
@@ -250,6 +260,30 @@
           <material>
             <ambient>1.0 1.0 1.0 1</ambient>
             <diffuse>1.0 1.0 1.0 1</diffuse>
+          </material>
+        </visual>
+        <visual name="base_arrow_shaft">
+          <pose>0.12 0 0.066 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.60 0.08 0.004</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.10 0.90 0.20 1</ambient>
+            <diffuse>0.10 0.90 0.20 1</diffuse>
+          </material>
+        </visual>
+        <visual name="base_arrow_head">
+          <pose>0.42 0 0.066 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.18 0.18 0.004</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.10 0.90 0.20 1</ambient>
+            <diffuse>0.10 0.90 0.20 1</diffuse>
           </material>
         </visual>
       </link>
@@ -335,10 +369,345 @@
       </link>
     </model>
 
+    <model name="terrain_crest_ridge_1">
+      <static>true</static>
+      <pose>4.7 -1.8 0.19 0 0 0.45</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>2.6 0.9 0.38</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>2.6 0.9 0.38</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.50 0.31 0.19 1</ambient>
+            <diffuse>0.50 0.31 0.19 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="terrain_crest_ridge_2">
+      <static>true</static>
+      <pose>-4.8 2.8 0.23 0 0 -0.30</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>2.2 1.0 0.46</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>2.2 1.0 0.46</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.54 0.33 0.20 1</ambient>
+            <diffuse>0.54 0.33 0.20 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="terrain_crest_mound">
+      <static>true</static>
+      <pose>1.0 -4.9 0.20 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <cylinder>
+              <radius>1.0</radius>
+              <length>0.40</length>
+            </cylinder>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>1.0</radius>
+              <length>0.40</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.46 0.28 0.17 1</ambient>
+            <diffuse>0.46 0.28 0.17 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="terrain_trough_1">
+      <static>true</static>
+      <pose>-0.6 -3.2 0.0 0 0 0.20</pose>
+      <link name="link">
+        <collision name="left_berm_collision">
+          <pose>0 0.72 0.17 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>3.4 0.44 0.34</size>
+            </box>
+          </geometry>
+        </collision>
+        <collision name="right_berm_collision">
+          <pose>0 -0.72 0.17 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>3.4 0.44 0.34</size>
+            </box>
+          </geometry>
+        </collision>
+        <collision name="channel_floor_collision">
+          <pose>0 0 0.02 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>3.4 0.95 0.04</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="left_berm_visual">
+          <pose>0 0.72 0.17 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>3.4 0.44 0.34</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.50 0.30 0.18 1</ambient>
+            <diffuse>0.50 0.30 0.18 1</diffuse>
+          </material>
+        </visual>
+        <visual name="right_berm_visual">
+          <pose>0 -0.72 0.17 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>3.4 0.44 0.34</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.50 0.30 0.18 1</ambient>
+            <diffuse>0.50 0.30 0.18 1</diffuse>
+          </material>
+        </visual>
+        <visual name="channel_floor_visual">
+          <pose>0 0 0.02 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>3.4 0.95 0.04</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.32 0.20 0.12 1</ambient>
+            <diffuse>0.32 0.20 0.12 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="terrain_trough_2">
+      <static>true</static>
+      <pose>3.9 3.6 0.0 0 0 -0.65</pose>
+      <link name="link">
+        <collision name="left_berm_collision">
+          <pose>0 0.55 0.14 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>2.6 0.35 0.28</size>
+            </box>
+          </geometry>
+        </collision>
+        <collision name="right_berm_collision">
+          <pose>0 -0.55 0.14 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>2.6 0.35 0.28</size>
+            </box>
+          </geometry>
+        </collision>
+        <collision name="channel_floor_collision">
+          <pose>0 0 0.02 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>2.6 0.70 0.04</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="left_berm_visual">
+          <pose>0 0.55 0.14 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>2.6 0.35 0.28</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.49 0.30 0.18 1</ambient>
+            <diffuse>0.49 0.30 0.18 1</diffuse>
+          </material>
+        </visual>
+        <visual name="right_berm_visual">
+          <pose>0 -0.55 0.14 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>2.6 0.35 0.28</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.49 0.30 0.18 1</ambient>
+            <diffuse>0.49 0.30 0.18 1</diffuse>
+          </material>
+        </visual>
+        <visual name="channel_floor_visual">
+          <pose>0 0 0.02 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>2.6 0.70 0.04</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.31 0.19 0.12 1</ambient>
+            <diffuse>0.31 0.19 0.12 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="obstacle_rock_3">
+      <static>true</static>
+      <pose>-5.4 -0.9 0.30 0.15 -0.05 0.30</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <sphere>
+              <radius>0.60</radius>
+            </sphere>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <sphere>
+              <radius>0.60</radius>
+            </sphere>
+          </geometry>
+          <material>
+            <ambient>0.43 0.26 0.16 1</ambient>
+            <diffuse>0.43 0.26 0.16 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="obstacle_rock_4">
+      <static>true</static>
+      <pose>5.2 1.7 0.24 0 0 1.10</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.9 1.3 0.48</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.9 1.3 0.48</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.42 0.25 0.15 1</ambient>
+            <diffuse>0.42 0.25 0.15 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="obstacle_debris_cluster">
+      <static>true</static>
+      <pose>-2.5 5.2 0.0 0 0 0.20</pose>
+      <link name="link">
+        <collision name="rock_a_collision">
+          <pose>0.0 0.0 0.11 0 0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.28</radius>
+              <length>0.22</length>
+            </cylinder>
+          </geometry>
+        </collision>
+        <collision name="rock_b_collision">
+          <pose>0.42 -0.20 0.09 0 0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.22</radius>
+              <length>0.18</length>
+            </cylinder>
+          </geometry>
+        </collision>
+        <collision name="rock_c_collision">
+          <pose>-0.35 0.25 0.08 0 0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.20</radius>
+              <length>0.16</length>
+            </cylinder>
+          </geometry>
+        </collision>
+        <visual name="rock_a_visual">
+          <pose>0.0 0.0 0.11 0 0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.28</radius>
+              <length>0.22</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.46 0.28 0.17 1</ambient>
+            <diffuse>0.46 0.28 0.17 1</diffuse>
+          </material>
+        </visual>
+        <visual name="rock_b_visual">
+          <pose>0.42 -0.20 0.09 0 0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.22</radius>
+              <length>0.18</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.41 0.25 0.15 1</ambient>
+            <diffuse>0.41 0.25 0.15 1</diffuse>
+          </material>
+        </visual>
+        <visual name="rock_c_visual">
+          <pose>-0.35 0.25 0.08 0 0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.20</radius>
+              <length>0.16</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.38 0.23 0.14 1</ambient>
+            <diffuse>0.38 0.23 0.14 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
     <!-- Mission drone spawn on base center -->
     <include>
-      <uri>file:///home/kunal/Desktop/drone/models/px4_x500_lidar_rgb</uri>
-      <pose>0 0 0.35 0 0 0</pose>
+      <name>px4_x500_lidar_rgb</name>
+      <uri>file:///home/kunal/Desktop/drone/models/px4_x500_lidar_rgb/model.sdf</uri>
+      <pose>0 0 0.70 0 0 0</pose>
     </include>
   </world>
 </sdf>
