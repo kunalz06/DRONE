@@ -1,0 +1,133 @@
+# Hardware Safety Configuration
+# Safety limits and parameters for real drone operations
+
+safety_manager:
+  ros__parameters:
+    # Geofence (distance from home in meters)
+    max_distance_from_home: 150.0
+    
+    # Altitude limits (meters AGL)
+    min_altitude: 0.3
+    max_altitude: 50.0
+    
+    # Battery thresholds (percentage)
+    battery_low_threshold: 25.0
+    battery_critical_threshold: 15.0
+    battery_emergency_threshold: 8.0
+    
+    # Communication timeout (seconds)
+    comm_loss_timeout: 3.0
+    
+    # Obstacle avoidance distances (meters)
+    obstacle_warning_distance: 3.0
+    obstacle_critical_distance: 1.0
+    
+    # Speed limits (m/s)
+    max_horizontal_speed: 5.0
+    max_vertical_speed: 2.0
+    
+    # GPS timeout (seconds)
+    gps_loss_timeout: 5.0
+    
+    # Automatic actions
+    auto_rtl_on_battery_low: true
+    auto_land_on_battery_critical: true
+    auto_rtl_on_comm_loss: true
+    auto_hover_on_gps_loss: true
+
+failsafe:
+  ros__parameters:
+    # Trigger conditions
+    trigger_on_tilt: true
+    max_tilt_angle_deg: 45.0
+    
+    # Motor failure detection
+    detect_motor_failure: true
+    motor_failure_rpm_threshold: 100.0
+    
+    # Vibration limits
+    max_vibration_level: 5.0
+    
+    # Wind limits
+    max_wind_speed_mps: 10.0
+    
+    # Temperature limits
+    max_motor_temp_c: 80.0
+    max_esc_temp_c: 70.0
+    max_battery_temp_c: 50.0
+
+pre_flight_checks:
+  ros__parameters:
+    # Required checks before arming
+    check_gps_fix: true
+    min_gps_fix_type: 3  # 3D fix
+    
+    check_home_position: true
+    check_battery_voltage: true
+    min_battery_voltage: 14.0  # For 4S LiPo
+    
+    check_imu_calibration: true
+    check_mag_calibration: true
+    check_baro_calibration: false
+    
+    check_sensors_healthy: true
+    check_rc_link: true  # For manual override capability
+    
+    # Minimum battery percentage for takeoff
+    min_battery_percent_for_takeoff: 30.0
+
+geofence:
+  ros__parameters:
+    # Geofence type: "circular" or "polygon"
+    fence_type: "circular"
+    
+    # Circular fence parameters
+    center_x: 0.0
+    center_y: 0.0
+    radius: 150.0
+    
+    # Polygon fence (optional - list of vertices)
+    # polygon_vertices: []
+    
+    # Action on fence breach
+    breach_action: "rtl"  # Options: "rtl", "land", "hover", "none"
+    
+    # Warning threshold (percentage of fence distance)
+    warning_threshold: 0.9
+
+rtl:
+  ros__parameters:
+    # Return to launch parameters
+    rtl_altitude: 20.0  # meters
+    rtl_speed: 5.0  # m/s
+    rtl_loiter_time: 0.0  # seconds to loiter before landing
+    rtl_land_altitude: 2.0  # start precision landing at this altitude
+    rtl_land_speed: 0.5  # m/s during final descent
+
+landing:
+  ros__parameters:
+    # Landing parameters
+    final_descent_speed: 0.3  # m/s
+    flare_altitude: 0.5  # meters - reduce descent rate
+    touchdown_detection_speed: 0.1  # m/s - considered landed when speed below this
+    
+    # Precision landing (ArUco)
+    use_precision_landing: false
+    aruco_marker_size: 0.3  # meters
+    aruco_max_align_error: 0.1  # meters
+    aruco_alignment_speed: 0.2  # m/s
+
+communication:
+  ros__parameters:
+    # Communication parameters
+    heartbeat_timeout: 1.0  # seconds
+    command_timeout: 0.5  # seconds for velocity commands
+    
+    # Telemetry rates (Hz)
+    position_telemetry_rate: 30.0
+    attitude_telemetry_rate: 50.0
+    battery_telemetry_rate: 1.0
+    
+    # Base station communication
+    base_station_ip: "192.168.1.100"
+    base_station_port: 14550

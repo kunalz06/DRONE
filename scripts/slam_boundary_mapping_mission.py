@@ -107,8 +107,8 @@ class SlamBoundaryMission(Node):
         self.mapping_stuck_timeout_s = 10.0
         self.obstacle_avoid_dist_m = 2.2
         self.obstacle_repulse_gain = 0.85
-        self.last_scan_ranges = None
-        self.last_scan_angles = None
+        self.last_scan_ranges: Optional[np.ndarray] = None
+        self.last_scan_angles: Optional[np.ndarray] = None
 
         self.bridge = CvBridge()
         self.tf_broadcaster = TransformBroadcaster(self)
@@ -180,12 +180,12 @@ class SlamBoundaryMission(Node):
         self.boundary_hover_until = -1.0
         self.boundary_avoid_start_s = -1.0
         self.last_boundary_log_s = -1.0
-        self.heading_aligned_since = None
-        self.heading_align_wait_start_s = None
+        self.heading_aligned_since: Optional[float] = None
+        self.heading_align_wait_start_s: Optional[float] = None
 
         self.phase = "WAIT_SENSORS"
         self.phase_start = self._now_s()
-        self.reached_since = None
+        self.reached_since: Optional[float] = None
         self.failsafe_triggered = False
         self.last_motor_cmd_warn_s = -1.0
         self.manual_mode_enabled = False
@@ -207,11 +207,11 @@ class SlamBoundaryMission(Node):
         self.dashboard_distance_m = 0.0
         self.arena_coverage_percent = 0.0
         self.last_coverage_update_s = -1.0
-        self.mapping_stuck_since = None
+        self.mapping_stuck_since: Optional[float] = None
 
         self.waypoints = self._build_mapping_waypoints()
         self.waypoint_idx = 0
-        self.active_waypoint_start_s = None
+        self.active_waypoint_start_s: Optional[float] = None
         self.coverage_grid = self._init_coverage_grid()
 
         self.control_timer = self.create_timer(1.0 / self.control_hz, self._control_tick)

@@ -1,0 +1,161 @@
+# Mission Configuration Parameters
+# This file centralizes all tunable mission parameters for easier hardware/simulation switching
+
+mission:
+  # Target altitude for mapping (meters)
+  target_altitude: 4.0
+
+  # Control loop frequency (Hz)
+  control_rate: 20.0
+
+  # Base/home position (world coordinates)
+  base_x: 0.0
+  base_y: 0.0
+
+  # Landing parameters
+  landing_z: 0.20
+  mid_altitude: 2.0
+  home_hover_duration: 2.0
+  mid_alt_hover_duration: 2.0
+
+velocity_limits:
+  max_xy_speed: 1.45
+  max_z_speed: 0.6
+  max_yaw_rate: 0.9
+  slow_descent_z_speed: 0.16
+  landing_z_speed: 0.12
+
+mapping:
+  # Arena dimensions
+  arena_half_extent: 8.0
+  edge_margin: 1.2
+  lane_spacing: 0.9
+  boundary_trigger_extent: 7.2
+
+  # Speed profile
+  speed_boost: 1.65
+  precision_radius: 1.4
+  precision_min_speed: 0.55
+
+  # Waypoint settings
+  waypoint_timeout: 22.0
+
+  # Coverage tracking
+  coverage_resolution: 0.50
+
+  # Stuck detection
+  stuck_speed_threshold: 0.05
+  stuck_distance_threshold: 0.55
+  stuck_timeout: 10.0
+
+heading_control:
+  yaw_kp: 1.4
+  align_tolerance_deg: 6.0
+  hover_before_move_duration: 0.15
+  align_timeout: 1.8
+  progress_ratio_while_aligning: 0.35
+  lateral_limit_while_aligning: 0.20
+
+boundary_detection:
+  # Yellow HSV thresholds
+  yellow_h_min: 18
+  yellow_h_max: 38
+  yellow_s_min: 80
+  yellow_s_max: 255
+  yellow_v_min: 80
+  yellow_v_max: 255
+
+  # Detection thresholds
+  front_yellow_threshold: 0.010
+  down_yellow_threshold: 0.010
+  yellow_hold_duration: 0.5
+
+  # Avoidance parameters
+  avoid_duration: 1.2
+  repulse_max_speed: 0.65
+  repulse_full_ratio: 0.10
+
+  # Boundary guard
+  guard_enter_strength: 0.08
+  guard_exit_strength: 0.03
+  boundary_hover_duration: 0.30
+  retreat_base_speed: 0.35
+  retreat_gain: 0.35
+  move_yaw_tolerance_deg: 6.0
+  min_escape_speed: 0.25
+  max_lateral_speed: 0.20
+  avoid_max_duration: 6.0
+
+obstacle_avoidance:
+  enable: true
+  detection_distance: 2.2
+  repulse_gain: 0.85
+
+altitude_control:
+  # ToF (Time of Flight) sensor settings
+  tof_topic: "/tof_scan"
+  tof_min_range: 0.05
+  tof_max_range: 6.0
+  tof_full_weight_range: 2.5
+  tof_blend_weight: 0.65
+  tof_timeout: 0.5
+
+battery:
+  initial_percent: 100.0
+  low_warn_percent: 25.0
+  critical_percent: 12.0
+  idle_drain_rate: 0.0025
+  full_drain_rate: 0.0600
+  max_reasonable_speed: 3.0
+  max_reasonable_distance: 12.0
+  smoothing_alpha: 0.18
+
+failsafe:
+  # Motor failure simulation (for testing)
+  test_enabled: false
+  trigger_distance: 2.9
+  failed_motor_index: 3  # 0-based
+
+  # Degraded flight parameters (3-motor)
+  three_motor_xy_speed: 0.45
+  three_motor_z_speed: 0.20
+  three_motor_land_speed: 0.08
+
+manual_control:
+  cmd_timeout: 0.6
+  max_xy_speed: 1.4
+  max_z_speed: 0.7
+  max_yaw_rate: 1.2
+
+command_rate_limiting:
+  enable: true
+  xy_acceleration: 2.2
+  z_acceleration: 1.4
+  yaw_acceleration: 2.0
+
+terrain_mapping:
+  scan_topic: "/terrain_scan"
+  cloud_topic: "/terrain_point_cloud"
+  point_stride: 2
+  lidar_pitch_deg: -30.0
+  lidar_offset: [0.0, 0.0, 0.065]
+
+sensors:
+  # Timeouts for sensor initialization
+  odom_timeout: 10.0
+  scan_timeout: 5.0
+  camera_timeout: 5.0
+
+safety:
+  # Geofence
+  max_distance_from_base: 15.0
+  min_altitude: 0.3
+  max_altitude: 10.0
+
+  # Communication loss
+  command_timeout: 1.0
+  auto_rtl_on_comm_loss: true
+
+  # Pre-flight checks
+  require_all_sensors: true
+  min_battery_for_takeoff: 30.0
